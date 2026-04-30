@@ -37,7 +37,7 @@ export default async function handler(req) {
 
     let targetPath = path;
     if (match) {
-      targetPath = path.replace(suffix, "");
+      targetPath = path.replace("_x"+suffix+"x_", "");
     }
 
     const baseIndex = targetPath.indexOf("/udp-sz");
