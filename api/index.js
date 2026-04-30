@@ -24,7 +24,7 @@ export default async function handler(req) {
     const method = req.method;
     const hasBody = method !== "GET" && method !== "HEAD";
 
-    const sfind = req.url.indexOf("/", 8);
+    const sfind = req.url.indexOf("/udp-sz");
 	const sfind2 = req.url.slice(req.url.indexOf("_"));
 
 	let url = null;
