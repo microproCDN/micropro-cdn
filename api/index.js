@@ -1,51 +1,75 @@
 export const config = { runtime: "edge" };
 
-const CDN_URL1 = process.env.CDN_URL1;
-const CDN_URL2 = process.env.CDN_URL2;
-const CDN_URL3 = process.env.CDN_URL3;
-const CDN_URL4 = process.env.CDN_URL4;
-const CDN_URL5 = process.env.CDN_URL5;
-const CDN_URL6 = process.env.CDN_URL6;
+// Use NEXT_PUBLIC_ or ensure they're injected at build
+const CDN_MAP = {
+  "_!1!_": process.env.NEXT_PUBLIC_CDN_URL1,
+  "_!2!_": process.env.NEXT_PUBLIC_CDN_URL2,
+  "_!3!_": process.env.NEXT_PUBLIC_CDN_URL3,
+  "_!4!_": process.env.NEXT_PUBLIC_CDN_URL4,
+  "_!5!_": process.env.NEXT_PUBLIC_CDN_URL5,
+  "_!6!_": process.env.NEXT_PUBLIC_CDN_URL6,
+};
 
 export default async function handler(req) {
   try {
-	// check addr
-    const res = new Headers();
+    const headers = new Headers();
     let caddr = null;
-    for (const [k, v] of req.headers) {
-	  const headers_find = new Set(["x-forwarded-host", "x-forwarded-proto", "x-forwarded-port", "proxy-authenticate", "proxy-authorization", "te", "trailer", "transfer-encoding", "upgrade", "forwarded", "host", "connection", "keep-alive"]);
-      if (headers_find.has(k)) continue; if (k.startsWith("x-vercel-")) continue;
-      if (k === "x-real-ip") { caddr = v; continue; }
-      if (k === "x-forwarded-for") { if (!caddr) caddr = v; continue; }
-      res.set(k, v);
+
+    const blocked = new Set([
+      "x-forwarded-host", "x-forwarded-proto", "x-forwarded-port",
+      "proxy-authenticate", "proxy-authorization", "te", "trailer",
+      "transfer-encoding", "upgrade", "forwarded", "host",
+      "connection", "keep-alive"
+    ]);
+
+    for (const [k, v] of req.headers.entries()) {
+      if (blocked.has(k)) continue;
+      if (k.startsWith("x-vercel-")) continue;
+
+      if (k === "x-real-ip") {
+        caddr = v;
+        continue;
+      }
+
+      if (k === "x-forwarded-for" && !caddr) {
+        caddr = v;
+        continue;
+      }
+
+      headers.set(k, v);
     }
-    if (caddr) res.set("x-forwarded-for", caddr);
+
+    if (caddr) headers.set("x-forwarded-for", caddr);
 
     const method = req.method;
     const hasBody = method !== "GET" && method !== "HEAD";
 
-    const sfind = req.url.indexOf("/udp-sz");
-	const sfind2 = req.url.slice(req.url.indexOf("_"));
+    const urlObj = new URL(req.url);
+    const path = urlObj.pathname;
 
-	let url = "";
-	let cdn_url = CDN_URL1;
-	if(sfind2 == '_2') cdn_url = CDN_URL1;
-	if(sfind2 == '_3') cdn_url = CDN_URL1;
-	if(sfind2 == '_4') cdn_url = CDN_URL1;
-	if(sfind2 == '_5') cdn_url = CDN_URL1;
-	if(sfind2 == '_6') cdn_url = CDN_URL1;
+    const match = path.match(/_!(\d)!_/);
+    const suffix = match ? `_${match[1]}` : "_!1!_";
+
+    const cdn_url = CDN_MAP[suffix] || CDN_MAP["_!1!_"];
+
+    let targetPath = path;
+    if (match) {
+      targetPath = path.replace(suffix, "");
+    }
+
+    const baseIndex = targetPath.indexOf("/udp-sz");
+    const finalPath =
+      baseIndex === -1 ? "/" : targetPath.slice(baseIndex);
 	
-	url = (sfind === -1 ? cdn_url + "/" : cdn_url + (sfind2 != '' ? req.url.slice(sfind).replace(sfind2,"") : req.url.slice(sfind)));
-	
-	if(url != "") {
-		return await fetch(url, {
-		  method,
-		  headers: res,
-		  body: hasBody ? req.body : undefined,
-		  duplex: "half",
-		  redirect: "manual",
-		});
-	}
+    const url = cdn_url + finalPath + urlObj.search;
+
+    return await fetch(url, {
+      method,
+      headers,
+      body: hasBody ? req.body : undefined,
+      redirect: "manual",
+    });
+
   } catch (err) {
     console.error("CDN Error:", err);
     return new Response("Error 502: Bad Gateway!", { status: 502 });
