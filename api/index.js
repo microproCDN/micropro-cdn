@@ -1,12 +1,12 @@
 export const config = { runtime: "edge" };
 
 const CDN_MAP = {
-  "_x1x_": process.env.CDN_URL1,
-  "_x2x_": process.env.CDN_URL2,
-  "_x3x_": process.env.CDN_URL3,
-  "_x4x_": process.env.CDN_URL4,
-  "_x5x_": process.env.CDN_URL5,
-  "_x6x_": process.env.CDN_URL6,
+  "_x1x_": (process.env.CDN_URL1 || ""),
+  "_x2x_": (process.env.CDN_URL2 || ""),
+  "_x3x_": (process.env.CDN_URL3 || ""),
+  "_x4x_": (process.env.CDN_URL4 || ""),
+  "_x5x_": (process.env.CDN_URL5 || ""),
+  "_x6x_": (process.env.CDN_URL6 || ""),
 };
 
 export default async function handler(req) {
