@@ -27,16 +27,17 @@ export default async function handler(req) {
     const sfind = req.url.indexOf("/udp-sz");
 	const sfind2 = req.url.slice(req.url.indexOf("_"));
 
-	let url = null;
-	if(sfind2 == '_1') url = (sfind === -1 ? CDN_URL1 + "/" : CDN_URL1 + req.url.slice(sfind).replace(sfind2,""));
-	if(sfind2 == '_2') url = (sfind === -1 ? CDN_URL2 + "/" : CDN_URL2 + req.url.slice(sfind).replace(sfind2,""));
-	if(sfind2 == '_3') url = (sfind === -1 ? CDN_URL3 + "/" : CDN_URL3 + req.url.slice(sfind).replace(sfind2,""));
-	if(sfind2 == '_4') url = (sfind === -1 ? CDN_URL4 + "/" : CDN_URL4 + req.url.slice(sfind).replace(sfind2,""));
-	if(sfind2 == '_5') url = (sfind === -1 ? CDN_URL5 + "/" : CDN_URL5 + req.url.slice(sfind).replace(sfind2,""));
-	if(sfind2 == '_6') url = (sfind === -1 ? CDN_URL6 + "/" : CDN_URL6 + req.url.slice(sfind).replace(sfind2,""));
-	if(sfind2 == '') url = (sfind === -1 ? CDN_URL1 + "/" : CDN_URL1 + req.url.slice(sfind));
+	let url = "";
+	let cdn_url = CDN_URL1;
+	if(sfind2 == '_2') cdn_url = CDN_URL1;
+	if(sfind2 == '_3') cdn_url = CDN_URL1;
+	if(sfind2 == '_4') cdn_url = CDN_URL1;
+	if(sfind2 == '_5') cdn_url = CDN_URL1;
+	if(sfind2 == '_6') cdn_url = CDN_URL1;
 	
-	if(url) {
+	url = (sfind === -1 ? cdn_url + "/" : cdn_url + (sfind2 != '' ? req.url.slice(sfind).replace(sfind2,"") : req.url.slice(sfind)));
+	
+	if(url != "") {
 		return await fetch(url, {
 		  method,
 		  headers: res,
@@ -46,6 +47,7 @@ export default async function handler(req) {
 		});
 	}
   } catch (err) {
-	  //TODO: add logs
+    console.error("CDN Error:", err);
+    return new Response("Error 502: Bad Gateway!", { status: 502 });
   }
 }
