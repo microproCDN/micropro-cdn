@@ -1,6 +1,5 @@
 export const config = { runtime: "edge" };
 
-// Use NEXT_PUBLIC_ or ensure they're injected at build
 const CDN_MAP = {
   "_x1x_": process.env.CDN_URL1,
   "_x2x_": process.env.CDN_URL2,
@@ -55,6 +54,6 @@ export default async function handler(req) {
 	});
   } catch (err) {
     console.error("CDN Error:", err);
-    return new Response("Error 502: Bad Gateway!", { status: 502 });
+    return new Response("Error 502: Bad Gateway! ", { status: 502 });
   }
 }
