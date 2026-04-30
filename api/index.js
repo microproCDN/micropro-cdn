@@ -2,44 +2,27 @@ export const config = { runtime: "edge" };
 
 // Use NEXT_PUBLIC_ or ensure they're injected at build
 const CDN_MAP = {
-  "_x1x_": process.env.NEXT_PUBLIC_CDN_URL1,
-  "_x2x_": process.env.NEXT_PUBLIC_CDN_URL2,
-  "_x3x_": process.env.NEXT_PUBLIC_CDN_URL3,
-  "_x4x_": process.env.NEXT_PUBLIC_CDN_URL4,
-  "_x5x_": process.env.NEXT_PUBLIC_CDN_URL5,
-  "_x6x_": process.env.NEXT_PUBLIC_CDN_URL6,
+  "_x1x_": process.env.CDN_URL1,
+  "_x2x_": process.env.CDN_URL2,
+  "_x3x_": process.env.CDN_URL3,
+  "_x4x_": process.env.CDN_URL4,
+  "_x5x_": process.env.CDN_URL5,
+  "_x6x_": process.env.CDN_URL6,
 };
 
 export default async function handler(req) {
   try {
-    const headers = new Headers();
+	// check addr
+    const res = new Headers();
     let caddr = null;
-
-    const blocked = new Set([
-      "x-forwarded-host", "x-forwarded-proto", "x-forwarded-port",
-      "proxy-authenticate", "proxy-authorization", "te", "trailer",
-      "transfer-encoding", "upgrade", "forwarded", "host",
-      "connection", "keep-alive"
-    ]);
-
-    for (const [k, v] of req.headers.entries()) {
-      if (blocked.has(k)) continue;
-      if (k.startsWith("x-vercel-")) continue;
-
-      if (k === "x-real-ip") {
-        caddr = v;
-        continue;
-      }
-
-      if (k === "x-forwarded-for" && !caddr) {
-        caddr = v;
-        continue;
-      }
-
-      headers.set(k, v);
+    for (const [k, v] of req.headers) {
+	  const headers_find = new Set(["x-forwarded-host", "x-forwarded-proto", "x-forwarded-port", "proxy-authenticate", "proxy-authorization", "te", "trailer", "transfer-encoding", "upgrade", "forwarded", "host", "connection", "keep-alive"]);
+      if (headers_find.has(k)) continue; if (k.startsWith("x-vercel-")) continue;
+      if (k === "x-real-ip") { caddr = v; continue; }
+      if (k === "x-forwarded-for") { if (!caddr) caddr = v; continue; }
+      res.set(k, v);
     }
-
-    if (caddr) headers.set("x-forwarded-for", caddr);
+    if (caddr) res.set("x-forwarded-for", caddr);
 
     const method = req.method;
     const hasBody = method !== "GET" && method !== "HEAD";
@@ -63,14 +46,13 @@ export default async function handler(req) {
 	
     const url = cdn_url + finalPath + urlObj.search;
 
-    return await fetch(url, {
-      method,
-      headers,
-      body: hasBody ? req.body : undefined,
-      duplex: "half",
-      redirect: "manual",
-    });
-
+	return await fetch(url, {
+	  method,
+	  headers: res,
+	  body: hasBody ? req.body : undefined,
+	  duplex: "half",
+	  redirect: "manual",
+	});
   } catch (err) {
     console.error("CDN Error:", err);
     return new Response("Error 502: Bad Gateway!", { status: 502 });
