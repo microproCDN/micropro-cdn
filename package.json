@@ -1,0 +1,7 @@
+{
+  "name": "micropro-cdn",
+  "version": "1.0.0",
+  "description": "MicroPro CDN backend to website.",
+  "private": true,
+  "license": "MIT"
+}
