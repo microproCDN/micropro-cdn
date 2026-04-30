@@ -2,12 +2,12 @@ export const config = { runtime: "edge" };
 
 // Use NEXT_PUBLIC_ or ensure they're injected at build
 const CDN_MAP = {
-  "_!1!_": process.env.NEXT_PUBLIC_CDN_URL1,
-  "_!2!_": process.env.NEXT_PUBLIC_CDN_URL2,
-  "_!3!_": process.env.NEXT_PUBLIC_CDN_URL3,
-  "_!4!_": process.env.NEXT_PUBLIC_CDN_URL4,
-  "_!5!_": process.env.NEXT_PUBLIC_CDN_URL5,
-  "_!6!_": process.env.NEXT_PUBLIC_CDN_URL6,
+  "_x1x_": process.env.NEXT_PUBLIC_CDN_URL1,
+  "_x2x_": process.env.NEXT_PUBLIC_CDN_URL2,
+  "_x3x_": process.env.NEXT_PUBLIC_CDN_URL3,
+  "_x4x_": process.env.NEXT_PUBLIC_CDN_URL4,
+  "_x5x_": process.env.NEXT_PUBLIC_CDN_URL5,
+  "_x6x_": process.env.NEXT_PUBLIC_CDN_URL6,
 };
 
 export default async function handler(req) {
@@ -47,10 +47,10 @@ export default async function handler(req) {
     const urlObj = new URL(req.url);
     const path = urlObj.pathname;
 
-    const match = path.match(/_!(\d)!_/);
-    const suffix = match ? `_${match[1]}` : "_!1!_";
+    const match = path.match(/_x(\d)x_/);
+    const suffix = match ? `_${match[1]}` : "_x1x_";
 
-    const cdn_url = CDN_MAP[suffix] || CDN_MAP["_!1!_"];
+    const cdn_url = CDN_MAP[suffix] || CDN_MAP["_x1x_"];
 
     let targetPath = path;
     if (match) {
@@ -67,6 +67,7 @@ export default async function handler(req) {
       method,
       headers,
       body: hasBody ? req.body : undefined,
+      duplex: "half",
       redirect: "manual",
     });
 
