@@ -31,13 +31,13 @@ export default async function handler(req) {
     const path = urlObj.pathname;
 
     const match = path.match(/_x(\d)x_/);
-    const suffix = match ? `_${match[1]}` : "_x1x_";
+    const suffix = match ? `_x${match[1]}x_` : "_x1x_";
 
     const cdn_url = CDN_MAP[suffix] || CDN_MAP["_x1x_"];
 
     let targetPath = path;
     if (match) {
-      targetPath = path.replace("_x"+suffix+"x_", "");
+      targetPath = path.replace(suffix, "");
     }
 
     const baseIndex = targetPath.indexOf("/udp-sz");
