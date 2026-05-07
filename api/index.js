@@ -1,5 +1,5 @@
 export const config = { runtime: "edge" };
-
+ 
 const CDN_MAP = {
   "_x1x_": (process.env.CDN_URL1 || ""),
   "_x2x_": (process.env.CDN_URL2 || ""),
