@@ -10,6 +10,7 @@ const CDN_MAP = {
 };
 
 export default async function handler(req) {
+  console.log("Request received");
   try {
 	// check addr
     const res = new Headers();
@@ -44,6 +45,7 @@ export default async function handler(req) {
       baseIndex === -1 ? "/" : targetPath.slice(baseIndex);
 	
     const url = cdn_url + finalPath + urlObj.search;
+	console.log("result: "+url);
 
 	return await fetch(url, {
 	  method,
