@@ -45,6 +45,7 @@ export default async function handler(req) {
       baseIndex === -1 ? "/" : targetPath.slice(baseIndex);
 	
     const url = cdn_url + finalPath + urlObj.search;
+	console.log("url: "+req.url);
 	console.log("result: "+url);
 
 	return await fetch(url, {
